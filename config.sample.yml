@@ -1,0 +1,6 @@
+bot:
+  token:
+api:
+  base: https://api.nightcord.de
+  appid:
+  appsecret:
