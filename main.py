@@ -60,13 +60,14 @@ def process(update, context, diff, server):
 @send_typing_action
 def gacha(update, context):
     if len(context.args) == 0:
-        currentgacha = getcurrentgacha()['id']
+        currentgacha = int(getcurrentgacha()['id'])
     else:
         currentgacha = context.args[0]
-    try:
-        update.message.reply_photo(fakegacha(currentgacha, 10, False, True))
-    except Exception as e:
-        update.message.reply_text('出了点毛病，可能是没这个池子')
+    gacha = fakegacha(currentgacha, 10, False, True)
+    if isinstance(gacha, str):
+        update.message.reply_text(gacha)
+        return
+    update.message.reply_photo(fakegacha(currentgacha, 10, False, True))
 
 
 def main():

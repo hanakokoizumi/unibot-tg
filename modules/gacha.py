@@ -106,7 +106,7 @@ def fakegacha(gachaid, num, reverse=False, selfbot=False):  # 仅支持普通活
         if data[i]['id'] == gachaid:
             gacha = data[i]
     if gacha is None:
-        return f'找不到编号为{gachaid}的卡池，命令:/sekai抽卡 /sekaiXX连 /sekai反抽卡，三个命令后面都可以加卡池id'
+        return f'找不到编号为{gachaid}的卡池，命令: /gacha，三个命令后面都可以加卡池id'
     rate4 = 0
     rate3 = 0
     for i in range(0, len(gacha['gachaCardRarityRates'])):
