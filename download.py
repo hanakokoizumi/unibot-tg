@@ -101,7 +101,10 @@ def update_all_trans():
 
 
 def update_master_data():
-    p = subprocess.Popen('git pull', shell=True, cwd='./assets/static/masterdata/')
+    if os.path.exists('./assets/static/masterdata/'):
+        p = subprocess.Popen('git pull', shell=True, cwd='./assets/static/masterdata/')
+    else:
+        p = subprocess.Popen('git clone https://github.com/Sekai-World/sekai-master-db-diff masterdata', shell=True, cwd='./assets/static/')
     p.wait()
 
 
@@ -155,8 +158,8 @@ if __name__ == '__main__':
     detect_play_data()
     update_all_trans()
     scheduler = BlockingScheduler()
+    scheduler.add_job(update_master_data, 'interval', hours=2, id='update_master_data')
     scheduler.add_job(detect_play_data, 'interval', seconds=300, id='play_info_check')
     scheduler.add_job(clean_cache, 'interval', seconds=300, id='clean_cache')
     scheduler.add_job(update_all_trans, 'interval', hours=2, id='update_all_trans')
-    scheduler.add_job(update_master_data, 'interval', hours=2, id='update_master_data')
     scheduler.start()

@@ -3,6 +3,7 @@ import yaml
 import logging
 from functools import partial
 from modules.profile import pjsk_profile, pjsk_process
+from modules.gacha import fakegacha, getcurrentgacha
 from functools import wraps
 from telegram import ChatAction
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
@@ -56,11 +57,24 @@ def process(update, context, diff, server):
         update.message.reply_text('出了点毛病，可能是没找着')
 
 
+@send_typing_action
+def gacha(update, context):
+    if len(context.args) == 0:
+        currentgacha = getcurrentgacha()['id']
+    else:
+        currentgacha = context.args[0]
+    try:
+        update.message.reply_photo(fakegacha(currentgacha, 10, False, True))
+    except Exception as e:
+        update.message.reply_text('出了点毛病，可能是没这个池子')
+
+
 def main():
     updater = Updater(token=config['bot']['token'], use_context=True)
     dispatcher = updater.dispatcher
 
     dispatcher.add_handler(CommandHandler('start', start, run_async=True))
+    dispatcher.add_handler(CommandHandler('gacha', gacha, run_async=True))
     dispatcher.add_handler(CommandHandler('profile', partial(profile, server='jp'), run_async=True))
     dispatcher.add_handler(CommandHandler('experts', partial(process, diff='expert', server='jp'), run_async=True))
     dispatcher.add_handler(CommandHandler('masters', partial(process, diff='master', server='jp'), run_async=True))

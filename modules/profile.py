@@ -2,12 +2,11 @@ import io
 import json
 import os.path
 import time
-from PIL import Image as PILImage
+from modules.image import *
 from PIL import ImageFont, ImageDraw
 import request as requests
 import yaml
 
-asset_path = 'assets/online'
 rank_match_grades = {
     1: 'ビギナー(初学者)',
     2: 'ブロンズ(青铜)',
@@ -22,24 +21,6 @@ with open('config.yml') as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
 
 
-class Image:
-    @classmethod
-    def open(cls, *args, **kwargs):
-        try:
-            return PILImage.open(*args, **kwargs)
-        except FileNotFoundError as e:
-            print(e.filename + " not found")
-            if e.filename.startswith(asset_path):
-                filename = e.filename.replace(asset_path + '/', '')
-                if not os.path.exists(os.path.abspath(os.path.join(e.filename, '..'))):
-                    os.makedirs(os.path.abspath(os.path.join(e.filename, '..')))
-                resp = requests.get('https://assets.pjsek.ai/file/pjsekai-assets/%s' % filename)
-                if resp.status_code == 200:
-                    with open(e.filename, 'wb') as f:
-                        f.write(resp.content)
-                    return PILImage.open(*args, **kwargs)
-            else:
-                raise e
 
 
 class UserProfile(object):
@@ -409,7 +390,7 @@ def pjsk_profile(userid, private=False, server='jp'):
                 pass
     img = img.convert('RGB')
     img_byte = io.BytesIO()
-    img.save(img_byte, format='PNG', quality=80)
+    img.save(img_byte, format='PNG')
     return img_byte.getvalue()
 
 
