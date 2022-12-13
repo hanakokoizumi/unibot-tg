@@ -5,7 +5,9 @@ from functools import partial
 from modules.profile import pjsk_profile, pjsk_process
 from modules.gacha import fakegacha, getcurrentgacha
 from functools import wraps
-from telegram import ChatAction
+from telegram import ChatAction, Update
+from request import get
+from db import sess, User
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 
 with open('config.yml') as f:
@@ -27,12 +29,57 @@ def start(update, context):
     update.message.reply_text('https://nightcord.de/')
 
 
-@send_typing_action
-def profile(update, context, server):
+def bind(update, context, server):
     if len(context.args) == 0:
+        update.message.reply_text('请提供玩家ID。')
+        return
+    userid = context.args[0]
+    if not userid.isdigit():
+        update.message.reply_text('玩家ID必须是数字。')
+        return
+    user = sess.query(User).filter(User.uid == update.message.from_user.id, User.server == server).first()
+    if user is not None:
+        update.message.reply_text('你已经绑定过了。')
+        return
+    resp = get(f'https://api.nightcord.de/profile/{server}/{userid}/')
+    if resp.status_code != 200:
+        update.message.reply_text('玩家不存在。')
+        return
+    sess.add(User(
+        uid=update.message.from_user.id,
+        server=server,
+        gid=userid
+    ))
+    sess.commit()
+    update.message.reply_text('绑定成功！')
+
+
+def unbind(update, context, server):
+    user = sess.query(User).filter(User.uid == update.message.from_user.id, User.server == server).first()
+    if user is None:
+        update.message.reply_text('你还没有绑定。')
+        return
+    sess.delete(user)
+    sess.commit()
+    update.message.reply_text('解绑成功！')
+
+
+@send_typing_action
+def profile(update: Update, context, server):
+    if update.message.reply_to_message:
+        user = update.message.reply_to_message.from_user
+        uid = user.id
+        db_user = sess.query(User).filter(User.uid == uid, User.server == server).first()
+        if db_user:
+            user_id = db_user.gid
+        else:
+            update.message.reply_text('该用户未绑定。')
+            return
+    elif len(context.args) == 0:
         update.message.reply_text('请指定玩家ID')
         return
-    user_id = context.args[0]
+    else:
+        user_id = context.args[0]
     if not user_id.isdigit():
         update.message.reply_text('玩家ID必须为数字')
         return
@@ -44,10 +91,20 @@ def profile(update, context, server):
 
 @send_typing_action
 def process(update, context, diff, server):
-    if len(context.args) == 0:
+    if update.message.reply_to_message:
+        user = update.message.reply_to_message.from_user
+        uid = user.id
+        db_user = sess.query(User).filter(User.uid == uid, User.server == server).first()
+        if db_user:
+            user_id = db_user.gid
+        else:
+            update.message.reply_text('该用户未绑定。')
+            return
+    elif len(context.args) == 0:
         update.message.reply_text('请指定玩家ID')
         return
-    user_id = context.args[0]
+    else:
+        user_id = context.args[0]
     if not user_id.isdigit():
         update.message.reply_text('玩家ID必须为数字')
         return
@@ -76,6 +133,8 @@ def main():
 
     dispatcher.add_handler(CommandHandler('start', start, run_async=True))
     dispatcher.add_handler(CommandHandler('gacha', gacha, run_async=True))
+    dispatcher.add_handler(CommandHandler('bind', partial(bind, server='jp'), run_async=True))
+    dispatcher.add_handler(CommandHandler('unbind', partial(unbind, server='jp'), run_async=True))
     dispatcher.add_handler(CommandHandler('profile', partial(profile, server='jp'), run_async=True))
     dispatcher.add_handler(CommandHandler('experts', partial(process, diff='expert', server='jp'), run_async=True))
     dispatcher.add_handler(CommandHandler('masters', partial(process, diff='master', server='jp'), run_async=True))

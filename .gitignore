@@ -162,3 +162,4 @@ cython_debug/
 assets/online/*
 venv_mac
 config.yml
+data/bot.db
