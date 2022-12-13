@@ -37,7 +37,9 @@ def bind(update, context, server):
     if not userid.isdigit():
         update.message.reply_text('玩家ID必须是数字。')
         return
-    user = sess.query(User).filter(User.uid == update.message.from_user.id, User.server == server).first()
+    user = update.message.sender_chat if update.message.from_user.username == 'Channel_Bot' else update.message.reply_to_message.from_user
+    uid = user.id
+    user = sess.query(User).filter(User.uid == uid, User.server == server).first()
     if user is not None:
         update.message.reply_text('你已经绑定过了。')
         return
@@ -55,7 +57,9 @@ def bind(update, context, server):
 
 
 def unbind(update, context, server):
-    user = sess.query(User).filter(User.uid == update.message.from_user.id, User.server == server).first()
+    user = update.message.sender_chat if update.message.from_user.username == 'Channel_Bot' else update.message.reply_to_message.from_user
+    uid = user.id
+    user = sess.query(User).filter(User.uid == uid, User.server == server).first()
     if user is None:
         update.message.reply_text('你还没有绑定。')
         return
@@ -67,7 +71,7 @@ def unbind(update, context, server):
 @send_typing_action
 def profile(update: Update, context, server):
     if update.message.reply_to_message:
-        user = update.message.sender_chat if update.message.from_user.username == 'Channel_Bot' else update.message.reply_to_message.from_user
+        user = update.message.reply_to_message.sender_chat if update.message.from_user.username == 'Channel_Bot' else update.message.reply_to_message.from_user
         uid = user.id
         db_user = sess.query(User).filter(User.uid == uid, User.server == server).first()
         if db_user:
@@ -76,7 +80,8 @@ def profile(update: Update, context, server):
             update.message.reply_text('该用户未绑定。')
             return
     elif len(context.args) == 0:
-        db_user = sess.query(User).filter(User.uid == update.message.from_user.id, User.server == server).first()
+        user = update.message.sender_chat if update.message.from_user.username == 'Channel_Bot' else update.message.from_user
+        db_user = sess.query(User).filter(User.uid == user.id, User.server == server).first()
         if db_user:
             user_id = db_user.gid
         else:
@@ -96,7 +101,7 @@ def profile(update: Update, context, server):
 @send_typing_action
 def process(update, context, diff, server):
     if update.message.reply_to_message:
-        user = update.message.sender_chat if update.message.from_user.username == 'Channel_Bot' else update.message.reply_to_message.from_user
+        user = update.message.reply_to_message.sender_chat if update.message.from_user.username == 'Channel_Bot' else update.message.reply_to_message.from_user
         uid = user.id
         db_user = sess.query(User).filter(User.uid == uid, User.server == server).first()
         if db_user:
@@ -105,7 +110,8 @@ def process(update, context, diff, server):
             update.message.reply_text('该用户未绑定。')
             return
     elif len(context.args) == 0:
-        db_user = sess.query(User).filter(User.uid == update.message.from_user.id, User.server == server).first()
+        user = update.message.sender_chat if update.message.from_user.username == 'Channel_Bot' else update.message.from_user
+        db_user = sess.query(User).filter(User.uid == user.id, User.server == server).first()
         if db_user:
             user_id = db_user.gid
         else:
