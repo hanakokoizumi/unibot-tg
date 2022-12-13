@@ -37,7 +37,7 @@ def bind(update, context, server):
     if not userid.isdigit():
         update.message.reply_text('玩家ID必须是数字。')
         return
-    user = update.message.sender_chat if update.message.from_user.username == 'Channel_Bot' else update.message.reply_to_message.from_user
+    user = update.message.sender_chat if update.message.from_user.username == 'Channel_Bot' else update.message.from_user
     uid = user.id
     user = sess.query(User).filter(User.uid == uid, User.server == server).first()
     if user is not None:
@@ -57,7 +57,7 @@ def bind(update, context, server):
 
 
 def unbind(update, context, server):
-    user = update.message.sender_chat if update.message.from_user.username == 'Channel_Bot' else update.message.reply_to_message.from_user
+    user = update.message.sender_chat if update.message.from_user.username == 'Channel_Bot' else update.message.from_user
     uid = user.id
     user = sess.query(User).filter(User.uid == uid, User.server == server).first()
     if user is None:
