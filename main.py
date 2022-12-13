@@ -67,7 +67,7 @@ def unbind(update, context, server):
 @send_typing_action
 def profile(update: Update, context, server):
     if update.message.reply_to_message:
-        user = update.message.reply_to_message.from_user
+        user = update.message.sender_chat if update.message.from_user.username == 'Channel_Bot' else update.message.reply_to_message.from_user
         uid = user.id
         db_user = sess.query(User).filter(User.uid == uid, User.server == server).first()
         if db_user:
@@ -76,8 +76,12 @@ def profile(update: Update, context, server):
             update.message.reply_text('该用户未绑定。')
             return
     elif len(context.args) == 0:
-        update.message.reply_text('请指定玩家ID')
-        return
+        db_user = sess.query(User).filter(User.uid == update.message.from_user.id, User.server == server).first()
+        if db_user:
+            user_id = db_user.gid
+        else:
+            update.message.reply_text('请使用 /bind 绑定，或指定玩家ID，或回复要查询的用户。')
+            return
     else:
         user_id = context.args[0]
     if not user_id.isdigit():
@@ -92,7 +96,7 @@ def profile(update: Update, context, server):
 @send_typing_action
 def process(update, context, diff, server):
     if update.message.reply_to_message:
-        user = update.message.reply_to_message.from_user
+        user = update.message.sender_chat if update.message.from_user.username == 'Channel_Bot' else update.message.reply_to_message.from_user
         uid = user.id
         db_user = sess.query(User).filter(User.uid == uid, User.server == server).first()
         if db_user:
@@ -101,8 +105,12 @@ def process(update, context, diff, server):
             update.message.reply_text('该用户未绑定。')
             return
     elif len(context.args) == 0:
-        update.message.reply_text('请指定玩家ID')
-        return
+        db_user = sess.query(User).filter(User.uid == update.message.from_user.id, User.server == server).first()
+        if db_user:
+            user_id = db_user.gid
+        else:
+            update.message.reply_text('请使用 /bind 绑定，或指定玩家ID，或回复要查询的用户。')
+            return
     else:
         user_id = context.args[0]
     if not user_id.isdigit():
