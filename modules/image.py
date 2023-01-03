@@ -22,6 +22,12 @@ class Image:
                     with open(e.filename, 'wb') as f:
                         f.write(resp.content)
                     return PILImage.open(*args, **kwargs)
+                elif resp.status_code == 404:
+                    resp = requests.get('https://assets.pjsek.ai/file/pjsekai-assets/%s' % filename)
+                    if resp.status_code == 200:
+                        with open(e.filename, 'wb') as f:
+                            f.write(resp.content)
+                        return PILImage.open(*args, **kwargs)
             else:
                 raise e
 
