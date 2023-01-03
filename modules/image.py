@@ -17,7 +17,7 @@ class Image:
                 filename = e.filename.replace(asset_path + '/', '')
                 if not os.path.exists(os.path.abspath(os.path.join(e.filename, '..'))):
                     os.makedirs(os.path.abspath(os.path.join(e.filename, '..')))
-                resp = requests.get('https://assets.pjsek.ai/file/pjsekai-assets/%s' % filename)
+                resp = requests.get('https://assets.unipjsk.com/%s' % filename)
                 if resp.status_code == 200:
                     with open(e.filename, 'wb') as f:
                         f.write(resp.content)

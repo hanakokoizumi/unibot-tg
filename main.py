@@ -92,10 +92,7 @@ def profile(update: Update, context, server):
     if not user_id.isdigit():
         update.message.reply_text('玩家ID必须为数字')
         return
-    try:
-        update.message.reply_photo(pjsk_profile(user_id, False, server))
-    except Exception as e:
-        update.message.reply_text('出了点毛病，可能是没找着')
+    update.message.reply_photo(pjsk_profile(user_id, False, server))
 
 
 @send_typing_action
