@@ -20,6 +20,17 @@
 
 注：如果遇到文件夹缺失，直接创建这个空文件夹即可。
 
+## 建议的 Commands List
+```
+start - Get URL of nightcord.de
+bind - Bind a JP player ID
+unbind - Unbind a JP player ID
+gacha - Execute an emulation of current gacha on JP server
+profile - Get profile of JP player
+experts - Get player process on expert diff of a JP player
+masters - Get player process on master diff of a JP player
+```
+
 ## Credits
 - [Unibot](https://github.com/watagashi-uni/Unibot) by [watagashi-uni](https://github.com/watagashi-uni)
 - [Nightcord API](https://docs.api.nightcord.de) by Hanako
