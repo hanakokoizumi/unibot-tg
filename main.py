@@ -8,7 +8,17 @@ from functools import wraps
 from telegram import ChatAction, Update
 from request import get
 from db import sess, User
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
+logger = logging.getLogger()  # 不加名称设置root logger
+logger.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+fh = logging.FileHandler('bot.log')
+fh.setLevel(logging.DEBUG)
+fh.setFormatter(formatter)
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+ch.setFormatter(formatter)
+logger.addHandler(ch)
+logger.addHandler(fh)
 
 with open('config.yml') as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
@@ -92,10 +102,7 @@ def profile(update: Update, context, server):
     if not user_id.isdigit():
         update.message.reply_text('玩家ID必须为数字')
         return
-    try:
-        update.message.reply_photo(pjsk_profile(user_id, False, server))
-    except Exception as e:
-        update.message.reply_text('出了点毛病，可能是没找着')
+    update.message.reply_photo(pjsk_profile(user_id, False, server))
 
 
 @send_typing_action
